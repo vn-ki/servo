@@ -59,6 +59,9 @@ def main(avd_name, apk_path, *args):
 
         json_params = shell_quote(json.dumps(args))
         extra = "-e servoargs " + json_params
+        rust_log = os.environ.get("RUST_LOG", None)
+        if rust_log:
+            extra += " -e servolog " + rust_log
         cmd = "am start " + extra + " org.mozilla.servo/org.mozilla.servo.MainActivity"
         check_call(adb + ["shell", cmd], stdout=sys.stderr)
 
@@ -67,7 +70,6 @@ def main(avd_name, apk_path, *args):
         logcat_args = [
             "--format=raw",  # Print no metadata, only log messages
             "simpleservo:D",  # Show (debug level) Rust stdio
-            "*:S",  # Hide everything else
         ]
         with terminate_on_exit(adb + ["logcat"] + logcat_args) as logcat:
 
